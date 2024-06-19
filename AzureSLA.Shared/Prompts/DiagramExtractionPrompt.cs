@@ -9,6 +9,7 @@ namespace AzureSLA.Shared.Prompts
             return new SystemChatMessage(
 """
 You MUST generate JSON data structure for the used Azure services into a given Azure Solution Diagram.
+When a Stamp is found the location of that Stamp should be taken from the parent perimeter.
 Your response MUST always be in JSON, no text before or after. The response MUST adhere to the following schemas:
 ```
 export enum PLACEMENT {
