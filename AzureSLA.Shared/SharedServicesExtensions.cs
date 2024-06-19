@@ -1,6 +1,7 @@
 ﻿
 
 
+
 namespace AzureSLA.Shared
 {
     public static class SharedServicesExtensions
@@ -17,7 +18,8 @@ namespace AzureSLA.Shared
                 return azureClient;
             });
             services.AddSingleton<ImageHelper>();
-            services.AddSingleton<DiagramAnalyzer>();
+            services.AddSingleton<DiagramExtractionPrompt>();
+            services.AddSingleton<DiagramAnalyzeService>();
 
             return services;
         }

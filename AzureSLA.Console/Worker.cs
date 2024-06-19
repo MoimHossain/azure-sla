@@ -1,8 +1,10 @@
-﻿
+﻿using AzureSLA.Shared.CognitiveServices;
+
 namespace AzureSLA.Console
 {
     public class Worker(
-        DiagramAnalyzer diagramAnalyzer,
+        DiagramAnalyzeService diagramAnalyzerService,
+        ImageHelper imageHelper,
         ILogger<Worker> logger) : BackgroundService
     {
         protected async override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -10,7 +12,10 @@ namespace AzureSLA.Console
             logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
 
             var imagePath = @"C:\Users\mohossa\Pictures\Saved Pictures\Architectures\abc.png";
-            await diagramAnalyzer.AnalyzeAsync(imagePath);
+
+            var imageBase64 = await imageHelper.GetBase64EmbeddedUriForImageAsync(imagePath);
+
+            await diagramAnalyzerService.AnalyzeAsync(imageBase64, "image/png", stoppingToken);
             
             
         }
