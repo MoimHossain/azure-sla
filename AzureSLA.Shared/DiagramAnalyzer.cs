@@ -1,24 +1,20 @@
 ﻿
-using Azure;
-using Azure.AI.OpenAI;
-using OpenAI.Chat;
 
 namespace AzureSLA.Shared
 {
-    public class DiagramAnalyzer(DaemonConfig config)
+    public class DiagramAnalyzer(
+        DaemonConfig config,
+        AzureOpenAIClient azureOpenAIClient,
+        ImageHelper imageHelper)
     {
         public async Task AnalyzeAsync(string imagePath)
         {
             try
             {
                 var azureOpenAIConfig = config.GetAzureOpenAIConfig();
-                AzureOpenAIClient azureClient = new(
-                    new Uri(azureOpenAIConfig.endpoint),
-                    new AzureKeyCredential(azureOpenAIConfig.key));
-
-                ChatClient chatClient = azureClient.GetChatClient(azureOpenAIConfig.deploymentName);
                 
-                var imageHelper = new ImageHelper();
+                ChatClient chatClient = azureOpenAIClient.GetChatClient(azureOpenAIConfig.deploymentName);
+                                
                 var imageBase64 = await imageHelper.GetBase64EmbeddedUriForImageAsync(imagePath);
 
                 var diagramMessage = ChatMessageContentPart.CreateImageMessageContentPart(imageBase64, "image/png");

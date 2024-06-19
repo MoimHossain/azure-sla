@@ -1,14 +1,28 @@
 ﻿
+var builder = Host.CreateApplicationBuilder(args);
 
-using AzureSLA.Shared;
+builder.Services.AddLogging(logging =>
+{
+    logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
+    logging.AddConsole();
+    logging.AddDebug();
+});
+builder.Services.AddSingleton(services =>
+{
+    var jsonSerializerOptions = new JsonSerializerOptions
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = true,
+        AllowTrailingCommas = true,
+        PropertyNameCaseInsensitive = true
+    };
+    jsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    return jsonSerializerOptions;
+});
 
-var config = new DaemonConfig();
+builder.Services.AddRequiredServices();
+builder.Services.AddHostedService<Worker>();
 
-var imagePath = @"C:\Users\mohossa\Pictures\Saved Pictures\Architectures\abc.png";
+var host = builder.Build();
+host.Run();
 
-var diagramAnalyzer = new DiagramAnalyzer(config);
-
-await diagramAnalyzer.AnalyzeAsync(imagePath);
-
-
-Console.WriteLine("Hello, World!");
