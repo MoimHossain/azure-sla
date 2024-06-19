@@ -11,13 +11,19 @@ namespace AzureSLA.Console
         {
             logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
 
-            var imagePath = @"C:\Users\mohossa\Pictures\Saved Pictures\Architectures\abc.png";
+            var imagePath = @"C:\Users\mohossa\Pictures\Saved Pictures\Architectures\demo.drawio.png";
 
             var imageBase64 = await imageHelper.GetBase64EmbeddedUriForImageAsync(imagePath);
 
-            await diagramAnalyzerService.AnalyzeAsync(imageBase64, "image/png", stoppingToken);
-            
-            
+            var components = await diagramAnalyzerService.AnalyzeAsync(imageBase64, "image/png", stoppingToken);
+
+            if (components != null)
+            {
+                foreach (var component in components)
+                {
+                    logger.LogInformation("Component: {component}", component);
+                }
+            }
         }
     }
 }

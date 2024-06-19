@@ -15,3 +15,6 @@ global using System.Threading.Tasks;
 global using AzureSLA.Shared.Prompts;
 global using AzureSLA.Shared.CognitiveServices;
 global using Microsoft.Extensions.Logging;
+
+global using AzureSLA.Shared.CognitiveServices.Models;
+global using System.Text.Json;

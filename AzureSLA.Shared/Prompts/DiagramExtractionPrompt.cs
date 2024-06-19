@@ -23,9 +23,10 @@ export interface AzureResource {
     name: string;
     placement: PLACEMENT;
     StampName?: string;
-    tier: Data | Compute | Storage | Networking | Security | Identity | Developer | Monitoring | UNKNOWN;
+    tier: Data | Compute | Storage | Messaging | Networking | TrafficRouting | Security | Identity | Developer | Monitoring | UNKNOWN;
     type: string;
     count: number;
+    location: string;
 }
 ```
 """
@@ -36,6 +37,16 @@ export interface AzureResource {
         {
             await Task.CompletedTask;
             return new UserChatMessage("Please give me the azure resources used into this diagram in JSON format.");
+        }
+
+        public async Task<UserChatMessage> GetImagePromptAsync(
+            BinaryData diagramData,
+            string mimeType,
+            CancellationToken cancellationToken)
+        {
+            await Task.CompletedTask;
+            var diagramMessage = ChatMessageContentPart.CreateImageMessageContentPart(diagramData, mimeType);
+            return new UserChatMessage(diagramMessage);
         }
     }
 }

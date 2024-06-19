@@ -1,16 +1,15 @@
 ﻿
 
-
-
 namespace AzureSLA.Shared.CognitiveServices
 {
     public class DiagramAnalyzeService(
         DaemonConfig config,
+        JsonSerializerOptions jsonSerializerOptions,
         AzureOpenAIClient azureOpenAIClient,
         DiagramExtractionPrompt diagramExtractionPrompt,
         ILogger<DiagramAnalyzeService> logger)
     {
-        public async Task AnalyzeAsync(
+        public async Task<List<AzureComponent>?> AnalyzeAsync(
             BinaryData diagramData, 
             string mimeType, 
             CancellationToken cancellationToken)
@@ -19,22 +18,26 @@ namespace AzureSLA.Shared.CognitiveServices
             {
                 var chatClient = CreateChatClient(config, azureOpenAIClient);
 
-                var diagramMessage = ChatMessageContentPart.CreateImageMessageContentPart(diagramData, mimeType);
-                var textMessage = ChatMessageContentPart.CreateTextMessageContentPart("Can you list all the azure resources into the diagram?");
+                var systemPrompt = await diagramExtractionPrompt
+                    .GetSystemPromptAsync(cancellationToken);
+                var diagramMessage = await diagramExtractionPrompt
+                    .GetImagePromptAsync(diagramData, mimeType, cancellationToken);
+                var userPrompt = await diagramExtractionPrompt
+                    .GetUserPromptAsync(cancellationToken);
 
-                ChatCompletion completion = await chatClient.CompleteChatAsync(
-                    [
-                        await diagramExtractionPrompt.GetSystemPromptAsync(cancellationToken),
-                        new UserChatMessage(diagramMessage),
-                        new UserChatMessage(textMessage)
-                    ], cancellationToken: cancellationToken);
+                ChatMessage[] prompts = [systemPrompt, diagramMessage, userPrompt];
+                ChatCompletion completion = await chatClient
+                    .CompleteChatAsync(prompts, cancellationToken: cancellationToken);
+                logger.LogInformation("{role}: {response}", completion.Role, completion.Content[0].Text);
+                var components = AzureComponent.FromJson(completion.Content[0].Text, jsonSerializerOptions);
 
-                logger.LogInformation($"{completion.Role}: {completion.Content[0].Text}");
+                return components;
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error while analyzing the diagram");
             }
+            return [];
         }
 
         private static ChatClient CreateChatClient(
