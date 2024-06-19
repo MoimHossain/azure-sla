@@ -1,5 +1,8 @@
-﻿namespace AzureSLA.Shared.CognitiveServices.Models
+﻿using System.Text.Json.Serialization;
+
+namespace AzureSLA.Shared.CognitiveServices.Models
 {
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum PLACEMENT
     {
         STAMP,
@@ -9,6 +12,7 @@
         UNKNOWN
     }
 
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum TIER
     {
         Data,
