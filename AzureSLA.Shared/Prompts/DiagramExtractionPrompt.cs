@@ -11,9 +11,18 @@ namespace AzureSLA.Shared.Prompts
 You MUST generate JSON data structure for the used Azure services into a given Azure Solution Diagram.
 Your response MUST always be in JSON, no text before or after. The response MUST adhere to the following schemas:
 ```
+export enum PLACEMENT {
+    STAMP = "Stamp",
+    REGIONAL = "Regional",
+    ZONAL = "Zonal",
+    GLOBAL = "Global",
+    UNKNOWN = "Unknown"
+}
+
 export interface AzureResource {    
     name: string;
-    placement: REGIONAL | ZONAL | GLOBAL | UNKNOWN;
+    placement: PLACEMENT;
+    StampName?: string;
     tier: Data | Compute | Storage | Networking | Security | Identity | Developer | Monitoring | UNKNOWN;
     type: string;
     count: number;
