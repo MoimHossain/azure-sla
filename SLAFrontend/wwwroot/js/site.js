@@ -141,22 +141,22 @@ function createDom(data) {
                 const row = $('<tr></tr>');
                 row.append(`<td>&nbsp;</td>`);
                 row.append(`<td>${component.name}</td>`);
-                row.append(`<td><input class="sla-input" type="number" data-gid="${groupIndex}" data-cid="${index}" value="${component.sla}" /></td>`);
+                row.append(`<td style="text-align: right;"><input class="sla-input" type="number" data-gid="${groupIndex}" data-cid="${index}" value="${component.sla}" />%</td>`);
                 tbody.append(row);
             });
 
-            const groupCompositeSlaRow = $('<tr></tr>');
+            const groupCompositeSlaRow = $('<tr class="group-sla-row"></tr>');
             groupCompositeSlaRow.append(`<td colSpan="1"></td>`);
             groupCompositeSlaRow.append(`<td colSpan="1">${groupItem.groupName} Composite SLA</td>`);
             const inputId = getGroupSlaInputId(groupIndex);            
-            groupCompositeSlaRow.append(`<td colSpan="2"><input class="group-sla-input" type="number" id="${inputId}" value="" /></td>`);
+            groupCompositeSlaRow.append(`<td colSpan="2"  style="text-align: right;"><input readonly class="group-sla-input" type="number" id="${inputId}" value="" />%</td>`);
             tbody.append(groupCompositeSlaRow);
         }
     });
-    const totalSlaRow = $('<tr></tr>');
+    const totalSlaRow = $('<tr class="total-sla-row"></tr>');
     totalSlaRow.append(`<td colSpan="1"></td>`);
     totalSlaRow.append(`<td colSpan="1">Total SLA</td>`);
-    totalSlaRow.append(`<td colSpan="2"><input class="group-sla-input" type="number" id="txt-totalSLA" value="" /></td>`);
+    totalSlaRow.append(`<td colSpan="2" style="text-align: right;"><input readonly class="group-sla-input" type="number" id="txt-totalSLA" value="" />%</td>`);
     tbody.append(totalSlaRow);
 }
 
