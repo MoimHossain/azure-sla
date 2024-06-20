@@ -129,6 +129,10 @@ function getGroupSlaInputId(groupIndex) {
     return `txt-${groupIndex}`;
 }
 
+function getGroupRegionCountId(groupIndex) {
+    return `txt-region-${groupIndex}`;
+}
+
 function createDom(data) {
     const tbody = $('#servicesTable tbody');
     tbody.empty();
@@ -146,9 +150,11 @@ function createDom(data) {
             });
 
             const groupCompositeSlaRow = $('<tr class="group-sla-row"></tr>');
+            const inputId = getGroupSlaInputId(groupIndex);
+            const regionInputId = getGroupRegionCountId(groupIndex);     
+
             groupCompositeSlaRow.append(`<td colSpan="1"></td>`);
-            groupCompositeSlaRow.append(`<td colSpan="1">${groupItem.groupName} Composite SLA</td>`);
-            const inputId = getGroupSlaInputId(groupIndex);            
+            groupCompositeSlaRow.append(`<td colSpan="1">Composite SLA (Region: <input class="region-sla-input" type="number" id="${regionInputId}" value="" />)</td>`);            
             groupCompositeSlaRow.append(`<td colSpan="2"  style="text-align: right;"><input readonly class="group-sla-input" type="number" id="${inputId}" value="" />%</td>`);
             tbody.append(groupCompositeSlaRow);
         }

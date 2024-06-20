@@ -76,9 +76,12 @@ canvas {
     text-align: right;
     width: 120px;
     border: none;
-
 }
 
+.region-sla-input {
+    text-align: right;
+    width: 120px;
+}
 
 table {
     width: 100%;
