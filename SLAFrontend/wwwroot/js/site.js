@@ -3,14 +3,18 @@
 const canvas = document.getElementById('drawingCanvas');
 
 const ctx = canvas.getContext('2d');
+const updateButton = document.getElementById('btn-update');
 
-
-document.getElementById('btn-update').addEventListener('click', async function () {
+updateButton.addEventListener('click', async function () {
     const imageData = window.lastImage;
     if (!imageData) {
         alert('No image detected!');
         return;
     }
+
+    $(updateButton).hide();
+    $('#loading-spinner').show();
+
 
     try {
         const response = await fetch('/api/SLA', {
@@ -25,13 +29,15 @@ document.getElementById('btn-update').addEventListener('click', async function (
 
         if (response.ok) {
             const jsonResponse = await response.json();
-            alert('Data posted successfully: ' + JSON.stringify(jsonResponse));
+            console.log(JSON.stringify(jsonResponse))
         } else {
             alert('Error: ' + response.statusText);
         }
     } catch (error) {
         alert('Error: ' + error.message);
     }
+    $(updateButton).show();
+    $('#loading-spinner').hide();
 });
 
 window.addEventListener('paste', function (event) {
@@ -67,4 +73,209 @@ window.addEventListener('paste', function (event) {
             break;
         }
     }
+});
+
+function updateCompositeSla(data) {
+    let totalSla = 1;
+
+    data.forEach((groupItem, groupIndex) => {
+        if (groupItem && groupItem.components) {
+            let groupCompositeSla = 1;
+
+            groupItem.components.forEach((component, index) => {
+                groupCompositeSla *= ((100 - component.sla) / 100);
+            });
+
+            const groupSla = ((1 - groupCompositeSla) * 100);
+            const inputId = getGroupSlaInputId(groupIndex);
+            $(`#${inputId}`).val(getSLAString(groupSla));
+
+            totalSla *= groupSla;
+        }
+    });
+    
+    let quantum = totalSla;
+    for (let x = 0; x < data.length - 1; ++x) {
+        quantum = quantum / 100;
+    }
+    $(`#txt-totalSLA`).val(getSLAString(quantum));
+}
+
+function getSLAString(value) {
+    // Convert the input value to a string
+    let strValue = value.toString();
+    // Find the position of the decimal point
+    let decimalPos = strValue.indexOf('.');
+
+    // If there is no decimal point, return the value as is
+    if (decimalPos === -1) {
+        return strValue;
+    }
+
+    // Traverse the string starting from the character after the decimal point
+    for (let i = decimalPos + 1; i < strValue.length; i++) {
+        // Check if the character is '0'
+        if (strValue[i] === '0') {
+            // Return the substring up to the position of the first '0'
+            return strValue.substring(0, i);
+        }
+    }
+
+    // If no zero is encountered, return the original string
+    return strValue;
+}
+
+function getGroupSlaInputId(groupIndex) {
+    return `txt-${groupIndex}`;
+}
+
+function createDom(data) {
+    const tbody = $('#servicesTable tbody');
+    tbody.empty();
+    data.forEach((groupItem, groupIndex) => {
+        if (groupItem && groupItem.components) {
+            const groupRow = $('<tr></tr>');
+            groupRow.append(`<td colSpan="4">${groupItem.groupName}</td>`);
+            tbody.append(groupRow);
+            groupItem.components.forEach((component, index) => {
+                const row = $('<tr></tr>');
+                row.append(`<td>&nbsp;</td>`);
+                row.append(`<td>${component.name}</td>`);
+                row.append(`<td><input class="sla-input" type="number" data-gid="${groupIndex}" data-cid="${index}" value="${component.sla}" /></td>`);
+                tbody.append(row);
+            });
+
+            const groupCompositeSlaRow = $('<tr></tr>');
+            groupCompositeSlaRow.append(`<td colSpan="1"></td>`);
+            groupCompositeSlaRow.append(`<td colSpan="1">${groupItem.groupName} Composite SLA</td>`);
+            const inputId = getGroupSlaInputId(groupIndex);            
+            groupCompositeSlaRow.append(`<td colSpan="2"><input class="group-sla-input" type="number" id="${inputId}" value="" /></td>`);
+            tbody.append(groupCompositeSlaRow);
+        }
+    });
+    const totalSlaRow = $('<tr></tr>');
+    totalSlaRow.append(`<td colSpan="1"></td>`);
+    totalSlaRow.append(`<td colSpan="1">Total SLA</td>`);
+    totalSlaRow.append(`<td colSpan="2"><input class="group-sla-input" type="number" id="txt-totalSLA" value="" /></td>`);
+    tbody.append(totalSlaRow);
+}
+
+function renderTable(data) {
+    createDom(data);
+    updateCompositeSla(data);
+    
+    $('.sla-input').on('input', function () {
+        try {
+            const groupIndex = $(this).data('gid');
+            const componentIndex = $(this).data('cid');
+            const newSlaValue = $(this).val();
+
+            const component = data[groupIndex].components[componentIndex];
+            component.sla = parseFloat(newSlaValue);
+            updateCompositeSla(data);
+        }
+        catch (error) {
+            console.error(error);
+        }
+    });
+}
+
+
+$(document).ready(function () {
+    const services = [
+        {
+            "groupName": "GLOBAL",
+            "components": [
+                {
+                    "name": "Azure Front Door",
+                    "placement": "GLOBAL",
+                    "stampName": "",
+                    "tier": "Networking",
+                    "type": "Front Door",
+                    "count": 1,
+                    "location": "Global",
+                    "slaString": "",
+                    "sla": 99.95
+                }
+            ]
+        },
+        {
+            "groupName": "STAMP",
+            "components": [
+                {
+                    "name": "Azure Application Gateway",
+                    "placement": "STAMP",
+                    "stampName": "Stamp A",
+                    "tier": "Networking",
+                    "type": "Application Gateway",
+                    "count": 1,
+                    "location": "Stamp A",
+                    "slaString": "",
+                    "sla": 0
+                },
+                {
+                    "name": "AKS",
+                    "placement": "STAMP",
+                    "stampName": "Stamp A",
+                    "tier": "Compute",
+                    "type": "Azure Kubernetes Service",
+                    "count": 1,
+                    "location": "Stamp A",
+                    "slaString": "",
+                    "sla": 0
+                },
+                {
+                    "name": "Service Bus",
+                    "placement": "STAMP",
+                    "stampName": "Stamp A",
+                    "tier": "Messaging",
+                    "type": "Service Bus",
+                    "count": 1,
+                    "location": "Stamp A",
+                    "slaString": "",
+                    "sla": 0
+                },
+                {
+                    "name": "Azure Blob Storage",
+                    "placement": "STAMP",
+                    "stampName": "Stamp A",
+                    "tier": "Storage",
+                    "type": "Blob Storage",
+                    "count": 1,
+                    "location": "Stamp A",
+                    "slaString": "",
+                    "sla": 0
+                }
+            ]
+        },
+        {
+            "groupName": "REGIONAL",
+            "components": [
+                {
+                    "name": "Azure SQL Business Critical",
+                    "placement": "REGIONAL",
+                    "stampName": "",
+                    "tier": "Data",
+                    "type": "SQL Database",
+                    "count": 1,
+                    "location": "West Europe",
+                    "slaString": "",
+                    "sla": 99.99
+                },
+                {
+                    "name": "Azure Storage Queue",
+                    "placement": "REGIONAL",
+                    "stampName": "",
+                    "tier": "Data",
+                    "type": "Storage",
+                    "count": 1,
+                    "location": "West Europe",
+                    "slaString": "",
+                    "sla": 99.9
+                }
+            ]
+        }
+    ];
+    renderTable(services);
+
 });

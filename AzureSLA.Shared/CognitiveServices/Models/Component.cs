@@ -37,6 +37,9 @@ namespace AzureSLA.Shared.CognitiveServices.Models
         public int Count { get; set; }
         public string Location { get; set; } = string.Empty;
 
+        public string SLAString { get; set; } = string.Empty;
+        public float SLA { get; set; }
+
         public static List<AzureComponent>? FromJson(string rawContent, JsonSerializerOptions jsonSerializerOptions)
         {
             rawContent = $"{rawContent}".Trim();
@@ -54,5 +57,11 @@ namespace AzureSLA.Shared.CognitiveServices.Models
         {
             return $"{Name} {Placement} ({Tier}) - {Location} ({Type})";
         }
+    }
+
+    public class ComponentGroup
+    {
+        public string GroupName { get; set; } = string.Empty;
+        public List<AzureComponent> Components { get; set; } = [];
     }
 }

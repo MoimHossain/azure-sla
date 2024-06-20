@@ -1,5 +1,6 @@
 ﻿using AzureSLA.Shared;
 using AzureSLA.Shared.CognitiveServices;
+using AzureSLA.Shared.CognitiveServices.Models;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -25,7 +26,23 @@ namespace SLAFrontend
                     BinaryData binaryData = new BinaryData(Convert.FromBase64String(base64));
 
                     var components = await diagramAnalyzeService.AnalyzeAsync(binaryData, mimeType, CancellationToken.None);
-                    return Ok(components);
+
+                    var groups = new List<ComponentGroup>();
+                    if(components != null && components.Count > 0)
+                    {
+                        // group by placement
+                        var placementGroups = components.GroupBy(c => c.Placement);
+                        foreach (var placementGroup in placementGroups)
+                        {
+                            var group = new ComponentGroup
+                            {
+                                GroupName= $"{placementGroup.Key}",
+                                Components = placementGroup.ToList()
+                            };
+                            groups.Add(group);
+                        }
+                    }
+                    return Ok(groups);
                 }
             }
             return Ok();

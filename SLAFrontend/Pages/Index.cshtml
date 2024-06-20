@@ -20,8 +20,18 @@
     <div class="container">
         <h2>SLA</h2>
         <button class="alert-primary" id="btn-update">Calculate</button>
+        <div style="display: none;" class="loading-spinner" id="loading-spinner"></div>
         <p>
-            test
+            <table id="servicesTable">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th style="width: 60%;">Name</th>
+                        <th>SLA</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </p>
     </div>
 </div>
