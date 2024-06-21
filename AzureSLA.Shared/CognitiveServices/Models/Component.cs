@@ -6,6 +6,7 @@ namespace AzureSLA.Shared.CognitiveServices.Models
     public enum PLACEMENT
     {
         STAMP,
+        Group,
         REGIONAL,
         ZONAL,
         GLOBAL,

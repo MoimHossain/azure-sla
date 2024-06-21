@@ -9,11 +9,13 @@ namespace AzureSLA.Shared.Prompts
             return new SystemChatMessage(
 """
 You MUST generate JSON data structure for the used Azure services into a given Azure Solution Diagram.
-When a Stamp is found the location of that Stamp should be taken from the parent perimeter.
+When a Stamp is found the location of that Stamp should be taken from the parent perimeter. 
+If you know the SLA for that service please provide it, otherwise provide 0.
 Your response MUST always be in JSON, no text before or after. The response MUST adhere to the following schemas:
 ```
 export enum PLACEMENT {
     STAMP = "Stamp",
+    Group = "Group",
     REGIONAL = "Regional",
     ZONAL = "Zonal",
     GLOBAL = "Global",
@@ -27,6 +29,7 @@ export interface AzureResource {
     tier: Data | Compute | Storage | Messaging | Networking | TrafficRouting | Security | Identity | Developer | Monitoring | UNKNOWN;
     type: string;
     count: number;
+    sla: number;
     location: string;
 }
 ```
