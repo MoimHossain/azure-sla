@@ -212,9 +212,6 @@ function renderTable(data) {
             const newSlaValue = $(this).val();
             const regionCount = parseInt(newSlaValue);
             setGroupRedundancy(data[groupIndex], regionCount);
-
-            console.log(data[groupIndex], regionCount)
-
             updateCompositeSla(data);
         }
         catch (error) {
