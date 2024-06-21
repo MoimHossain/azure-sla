@@ -158,7 +158,7 @@ function createDom(data) {
     tbody.empty();
     data.forEach((groupItem, groupIndex) => {
         if (groupItem && groupItem.components) {
-            const groupRow = $('<tr></tr>');
+            const groupRow = $('<tr class="group-header-row"></tr>');
             groupRow.append(`<td colSpan="4">${groupItem.groupName}</td>`);
             tbody.append(groupRow);
             groupItem.components.forEach((component, index) => {

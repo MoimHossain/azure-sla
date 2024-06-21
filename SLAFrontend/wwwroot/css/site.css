@@ -98,6 +98,12 @@ th {
     background-color: #f2f2f2;
 }
 
+.group-header-row {
+    background-color: darkgray;
+    color: #f3f3f3;
+    font-style: italic;
+}
+
 .group-sla-row {
     background-color: floralwhite;
     font-weight: bold;
