@@ -87,7 +87,11 @@ function updateCompositeSla(data) {
             let groupCompositeSla = 1;
 
             groupItem.components.forEach((component, index) => {
-                groupCompositeSla *= ((100 - component.sla) / 100);
+                if (component.active === true) {
+                    groupCompositeSla *= ((100 - component.sla) / 100);
+                } else {
+                    console.log("Skipping ", component.name)
+                }
             });
 
             let groupSla = ((1 - groupCompositeSla) * 100);
@@ -156,6 +160,13 @@ function getGroupRegionCountId(groupIndex) {
     return `txt-region-${groupIndex}`;
 }
 
+function getCheckedState(component) {
+    if (component.active === undefined) {
+        component.active = true;
+    }    
+    return component.active === true ? "checked" : "";
+}
+
 function createDom(data) {
     const tbody = $('#servicesTable tbody');
     tbody.empty();
@@ -166,7 +177,7 @@ function createDom(data) {
             tbody.append(groupRow);
             groupItem.components.forEach((component, index) => {
                 const row = $('<tr></tr>');
-                row.append(`<td>&nbsp;</td>`);
+                row.append(`<td><input class="service-check-box" type="checkbox" data-gid="${groupIndex}" data-cid="${index}" ${getCheckedState(component)}></td>`);
                 row.append(`<td>${component.name}</td>`);
                 row.append(`<td style="text-align: right;"><input class="sla-input" type="number" data-gid="${groupIndex}" data-cid="${index}" value="${component.sla}" />%</td>`);
                 tbody.append(row);
@@ -221,6 +232,24 @@ function renderTable(data) {
             console.error(error);
         }
     });
+
+    $('.service-check-box').on('input', function () {
+        try {
+            const groupIndex = $(this).data('gid');
+            const componentIndex = $(this).data('cid');
+            var isChecked = $(this).prop('checked');
+
+            const component = data[groupIndex].components[componentIndex];
+            component.active = isChecked;
+
+            updateCompositeSla(data);
+        }
+        catch (error) {
+            console.error(error);
+        }
+    });
+
+    
 }
 
 /*

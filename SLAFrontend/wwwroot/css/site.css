@@ -124,3 +124,10 @@ th {
     background-color: coral;
     font-weight: bold;
 }
+
+.service-check-box {
+    margin: 0px -10px 0px 10px;
+    color: #258cfb;
+    accent-color: #ff6a00;
+}
+
