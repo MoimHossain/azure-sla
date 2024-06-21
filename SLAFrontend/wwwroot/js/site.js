@@ -80,14 +80,23 @@ function updateCompositeSla(data) {
 
     data.forEach((groupItem, groupIndex) => {
         if (groupItem && groupItem.components) {
+            const inputId = getGroupSlaInputId(groupIndex);
             let groupCompositeSla = 1;
 
             groupItem.components.forEach((component, index) => {
                 groupCompositeSla *= ((100 - component.sla) / 100);
             });
 
-            const groupSla = ((1 - groupCompositeSla) * 100);
-            const inputId = getGroupSlaInputId(groupIndex);
+            let groupSla = ((1 - groupCompositeSla) * 100);
+
+            const regionCount = getGroupRedundancy(groupItem);
+            if (regionCount > 1) {
+                
+                const slaWithRegionalRedundancy = (1 - Math.pow((1 - (groupSla / 100)), regionCount)) * 100;
+                groupSla = slaWithRegionalRedundancy;
+
+            }
+            
             $(`#${inputId}`).val(getSLAString(groupSla));
 
             totalSla *= groupSla;
@@ -125,6 +134,17 @@ function getSLAString(value) {
     return strValue;
 }
 
+function getGroupRedundancy(groupItem) {
+    if (!groupItem.regionCount) {
+        groupItem.regionCount = 1;        
+    }
+    return groupItem.regionCount;
+}
+
+function setGroupRedundancy(groupItem, count) {
+    groupItem.regionCount = count;
+}
+
 function getGroupSlaInputId(groupIndex) {
     return `txt-${groupIndex}`;
 }
@@ -151,10 +171,11 @@ function createDom(data) {
 
             const groupCompositeSlaRow = $('<tr class="group-sla-row"></tr>');
             const inputId = getGroupSlaInputId(groupIndex);
-            const regionInputId = getGroupRegionCountId(groupIndex);     
+            const regionInputId = getGroupRegionCountId(groupIndex);
+            const regionCount = getGroupRedundancy(groupItem);
 
             groupCompositeSlaRow.append(`<td colSpan="1"></td>`);
-            groupCompositeSlaRow.append(`<td colSpan="1">Composite SLA (Region: <input class="region-sla-input" type="number" id="${regionInputId}" value="" />)</td>`);            
+            groupCompositeSlaRow.append(`<td colSpan="1">Composite SLA (Region: <input class="region-sla-input" type="number" data-gid="${groupIndex}" id="${regionInputId}" value="${regionCount}" />)</td>`);            
             groupCompositeSlaRow.append(`<td colSpan="2"  style="text-align: right;"><input readonly class="group-sla-input" type="number" id="${inputId}" value="" />%</td>`);
             tbody.append(groupCompositeSlaRow);
         }
@@ -178,6 +199,22 @@ function renderTable(data) {
 
             const component = data[groupIndex].components[componentIndex];
             component.sla = parseFloat(newSlaValue);
+            updateCompositeSla(data);
+        }
+        catch (error) {
+            console.error(error);
+        }
+    });
+
+    $('.region-sla-input').on('input', function () {
+        try {
+            const groupIndex = $(this).data('gid');
+            const newSlaValue = $(this).val();
+            const regionCount = parseInt(newSlaValue);
+            setGroupRedundancy(data[groupIndex], regionCount);
+
+            console.log(data[groupIndex], regionCount)
+
             updateCompositeSla(data);
         }
         catch (error) {
