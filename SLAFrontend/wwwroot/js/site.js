@@ -28,8 +28,11 @@ updateButton.addEventListener('click', async function () {
         });
 
         if (response.ok) {
-            const jsonResponse = await response.json();
-            console.log(JSON.stringify(jsonResponse))
+            const services = await response.json();
+            
+            console.log(services);
+
+            renderTable(services);
         } else {
             alert('Error: ' + response.statusText);
         }
@@ -220,7 +223,7 @@ function renderTable(data) {
     });
 }
 
-
+/*
 $(document).ready(function () {
     const services = [
         {
@@ -319,3 +322,4 @@ $(document).ready(function () {
     renderTable(services);
 
 });
+*/
