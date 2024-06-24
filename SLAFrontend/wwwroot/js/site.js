@@ -5,6 +5,11 @@ const canvas = document.getElementById('drawingCanvas');
 const ctx = canvas.getContext('2d');
 const updateButton = document.getElementById('btn-update');
 
+
+setTimeout(() => {
+    window.animCtl.init();
+}, 1000);
+
 updateButton.addEventListener('click', async function () {
     const imageData = window.lastImage;
     if (!imageData) {
@@ -15,11 +20,17 @@ updateButton.addEventListener('click', async function () {
     $(updateButton).hide();
     $('#loading-spinner').show();
 
+    $('#animGraphContainer').show();
+    $('#servicesTable').hide();
+
 
     //setTimeout(() => {
     //    $(updateButton).show();
     //    $('#loading-spinner').hide();
-    //}, 2000)
+
+    //    $('#animGraphContainer').hide();
+    //    $('#servicesTable').show();
+    //}, 4000)
     //return;
 
 
@@ -48,6 +59,8 @@ updateButton.addEventListener('click', async function () {
     }
     $(updateButton).show();
     $('#loading-spinner').hide();
+    $('#animGraphContainer').hide();
+    $('#servicesTable').show();
 });
 
 window.addEventListener('paste', function (event) {

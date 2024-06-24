@@ -38,7 +38,7 @@ body {
 
 .navbar .container .navbar-brand {
     font-weight: bold;
-    margin-left: -180px;
+    margin-left: -90px;
     color: #ed1717;
 }
 
@@ -60,7 +60,7 @@ body {
 }
 
 .left {
-    margin: -160px 0px 0px 20px;
+    margin: -76px 0px 0px 20px;
 }
 
 .right {
@@ -117,16 +117,18 @@ table {
     border-collapse: collapse;
     box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.5);
     background-color: #2c2c2c;
+    color: #fff6f6
 }
 
 th, td {
     border: 1px solid #ddd;
     padding: 8px;
-    text-align: left;
+    text-align: left;    
 }
 
 th {
     background-color: #f2f2f2;
+    color: #2e1919;
 }
 
 .group-header-row {
@@ -138,6 +140,7 @@ th {
 .group-sla-row {
     background-color: floralwhite;
     font-weight: bold;
+    color: #564c4c;
 }
 
 .group-sla-row input {
@@ -161,3 +164,6 @@ th {
     accent-color: #ff6a00;
 }
 
+#animationContainer {
+    margin-top: 6px;
+}
