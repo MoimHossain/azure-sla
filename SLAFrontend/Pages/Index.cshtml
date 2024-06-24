@@ -6,32 +6,37 @@
 
 
 
+<div class="page-content">
 
-<div class="half left">
-    <div class="container">
-        <h2>Diagram</h2>
-        <p>Please paste your architecture diagram below</p>
+    <div class="half left">
+        <div class="container">
+            <h2>Diagram</h2>
+            <p>Please paste your architecture diagram below</p>
 
-        <canvas id="drawingCanvas" width="760" height="700"></canvas>
+            <canvas id="drawingCanvas" width="700" height="660"></canvas>
+        </div>
+
     </div>
-
-</div>
-<div class="half right">
-    <div class="container">
-        <h2>SLA</h2>
-        <button class="alert-primary" id="btn-update">Calculate</button>
-        <div style="display: none;" class="loading-spinner" id="loading-spinner"></div>
-        <p>
-            <table id="servicesTable">
-                <thead>
-                    <tr>
-                        <th></th>
-                        <th style="width: 60%;">Name</th>
-                        <th style ="text-align: center;">SLA (percentage)</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </p>
+    <div class="half right">
+        <div class="container">
+            <h2>SLA</h2>
+            <button class="btn btn-danger" id="btn-update">Calculate</button>
+            <div style="display: none;" class="loading-spinner" id="loading-spinner"></div>
+            <p id="animGraphContainer" style="display: none;">
+                <canvas id="animationContainer" width="680" height="640"></canvas>
+            </p>
+            <p id="slaTableContainer">
+                <table id="servicesTable">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th style="width: 60%;">Name</th>
+                            <th style="text-align: center;">SLA (percentage)</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </p>
+        </div>
     </div>
 </div>

@@ -9,10 +9,10 @@
     <link rel="stylesheet" href="~/SLAFrontend.styles.css" asp-append-version="true" />
 </head>
 <body>
-@*     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark border-bottom box-shadow mb-3">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-page="/Index">Azure SLA calculator</a>
+                <a class="navbar-brand" asp-area="" asp-page="/Index">Azure SLA calculator - v1</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -29,18 +29,22 @@
                 </div>
             </div>
         </nav>
-    </header> *@
+    </header>
     @RenderBody()
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2024 - Moim Hossain - <a asp-area="" asp-page="/Privacy">Privacy</a>
+            SLAs are calculated using GenAI, results might not always accurate, please validate yourself.
+            
+            &copy; 2024 - Moim Hossain
         </div>
     </footer>
 
+    
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/animation.js" asp-append-version="true"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>    
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>
