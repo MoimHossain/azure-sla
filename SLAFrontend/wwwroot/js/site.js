@@ -16,6 +16,13 @@ updateButton.addEventListener('click', async function () {
     $('#loading-spinner').show();
 
 
+    //setTimeout(() => {
+    //    $(updateButton).show();
+    //    $('#loading-spinner').hide();
+    //}, 2000)
+    //return;
+
+
     try {
         const response = await fetch('/api/SLA', {
             method: 'POST',
