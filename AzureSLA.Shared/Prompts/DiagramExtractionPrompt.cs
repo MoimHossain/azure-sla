@@ -10,6 +10,7 @@ namespace AzureSLA.Shared.Prompts
 """
 You MUST generate JSON data structure for the used Azure services into a given Azure Solution Diagram.
 Each rectangle in the diagram represents a region, stamp or group of services. The diagram can contain multiple regions, stamps or groups.
+Always group services if they are surrounded by a rectangle.
 If you know the SLA for that service please provide it, otherwise provide 99.9.
 Your response MUST always be in JSON, no text before or after. The response MUST adhere to the following schemas:
 ```
