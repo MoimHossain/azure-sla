@@ -11,7 +11,7 @@ namespace AzureSLA.Console
         {
             logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
 
-            var imagePath = @"C:\Users\mohossa\Pictures\Saved Pictures\Architectures\demo.drawio.png";
+            var imagePath = @"C:\Users\mohossa\Pictures\Saved Pictures\Architectures\dataset1.png";
 
             var imageBase64 = await imageHelper.GetBase64EmbeddedUriForImageAsync(imagePath);
 

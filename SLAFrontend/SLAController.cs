@@ -30,8 +30,15 @@ namespace SLAFrontend
                     var groups = new List<ComponentGroup>();
                     if(components != null && components.Count > 0)
                     {
+                        foreach (var component in components)
+                        {
+                            if(string.IsNullOrEmpty(component.StampName))
+                            {
+                                component.StampName = component.Placement.ToString();
+                            }
+                        }
                         // group by placement
-                        var placementGroups = components.GroupBy(c => c.Placement);
+                        var placementGroups = components.GroupBy(c => c.StampName);
                         foreach (var placementGroup in placementGroups)
                         {
                             var group = new ComponentGroup
