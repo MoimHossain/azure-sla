@@ -70,6 +70,7 @@ Ext.define('Component', {
         { name: 'tier', type: 'string' },
         { name: 'type', type: 'string' },
         { name: 'sla', type: 'float' },
+        { name: 'regionCount', type: 'int' },
         { name: 'included', type: 'boolean' }
     ]
 });
@@ -163,6 +164,77 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
         startCollapsed: false,
         enableGroupingMenu: false
     }],
+    getGroupRegionCount: function (groupName) {
+        // create a const key for the group name that has not whitespeace in it
+        const key = groupName.trim().replace(/\s/g, '-');
+        
+        // chek if 'this' has a property called 'regionCountMap'
+        // if not create an empty object
+        // then with in that object if there is map for the given group name
+        // if not then return 1
+        // else return the value of the map
+        if (!this.regionCountMap) {
+            this.regionCountMap = {};
+        }
+        if (!this.regionCountMap[key]) {
+            return 1;
+        }
+        return this.regionCountMap[key];
+    },
+    setGroupRegionCount: function (groupName, value) {        
+        // create a const key for the group name that has not whitespeace in it
+        const key = groupName.trim().replace(/\s/g, '-');
+        // chek if 'this' has a property called 'regionCountMap'
+        // if not create an empty object
+        // then with in that object set the value of the map for the given group name
+        if (!this.regionCountMap) {
+            this.regionCountMap = {};
+        }
+        this.regionCountMap[key] = value;
+    },
+    getDistinctGroupNames: function () {
+        const store = this.getStore();
+        const recordsCount = store.getCount();
+        const distrinctGroupNames = [];
+        for (let i = 0; i < recordsCount; i++) {
+            const record = store.getAt(i);
+            record.commit();
+            const groupName = record.get('groupName');
+            if (distrinctGroupNames.indexOf(groupName) === -1) {
+                distrinctGroupNames.push(groupName);
+            }
+        }
+        return distrinctGroupNames;
+    },
+    getRecordsByGroupName: function (groupName) {
+        const store = this.getStore();
+        const recordsCount = store.getCount();
+        const records = [];
+        for (let i = 0; i < recordsCount; i++) {
+            const record = store.getAt(i);
+            const recordGroupName = record.get('groupName');
+            if (recordGroupName === groupName && record.get('included') === true) {
+                records.push(record);
+            }
+        }
+        return records;
+    },
+    updateSlas: function () {
+        const groupNames = this.getDistinctGroupNames();
+        let totalSla = 1;
+        for (let i = 0; i < groupNames.length; i++) {
+            const groupName = groupNames[i];
+            let groupCompositeSla = 1;
+            const records = this.getRecordsByGroupName(groupName);
+            for (let j = 0; j < records.length; j++) {
+                const record = records[j];
+                groupCompositeSla *= ((100 - record.get('sla')) / 100);
+            }
+        }
+
+        // update grid view
+        this.getView().refresh();
+    },
     loadNewSlaData: function () {
         let componentId = 1;
         const refinedComponents = [];
@@ -173,6 +245,7 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                 const component = components[j];
                 refinedComponents.push({
                     included: true,
+                    regionCount: 1,
                     componentId: componentId++,
                     groupName: groupName,
                     name: component.name,
@@ -196,12 +269,46 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
         const groupStore = this.groupStore;
         groupStore.removeAll();
         groupStore.loadData(uniqueGroupNames.map(gn => ({ groupName: gn })));
+    },
+    getSLAString: function (value) {
+        // Convert the input value to a string
+        let strValue = value.toString();
+        // Find the position of the decimal point
+        let decimalPos = strValue.indexOf('.');
+        // If there is no decimal point, return the value as is
+        if (decimalPos === -1) {
+            return strValue;
+        }
+        // Traverse the string starting from the character after the decimal point
+        for (let i = decimalPos + 1; i < strValue.length; i++) {
+            // Check if the character is '0'
+            if (strValue[i] === '0') {
+                // Return the substring up to the position of the first '0'
+                return strValue.substring(0, i);
+            }
+        }
+        return strValue;
+    },
+    listeners: {
+        afterrender: function (grid) {
+            const gridEl = grid.getEl();
+            gridEl.dom.addEventListener('input', function (event) {
+                if (event.target 
+                    && event.target.nodeName === 'INPUT'
+                    && event.target.classList.contains('region-sla-input')) {
 
+                    console.log('Input value changed to:', event.target.value);
+                    console.log('Input Event Group:', event.target.dataset.group);
 
-
-
+                    const groupName = event.target.dataset.group;
+                    const value = event.target.value;
+                    grid.setGroupRegionCount(groupName, value);
+                }
+              });
+        }
     },
     initComponent: function () {
+        const GRID = this;
         this.cellEditing = new Ext.grid.plugin.CellEditing({
             clicksToEdit: 1
         });
@@ -211,12 +318,12 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                 fields: ['groupName'],
                 data: [],
                 addNewGroup: function (groupName) {
-                    // check if the groupName already exists
                     const groupNames = this.data.items.map(g => g.data.groupName);
                     if (groupNames.indexOf(groupName) > -1) {
-                        return;
+                        return false;
                     }
                     this.add({ groupName: groupName });
+                    return true;
                 }
             })
         });
@@ -231,18 +338,26 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                 listeners:{
                     scope: this,
                     blur: ( combo, eOpts ) => {
-                        // get the value from the raw input text
-                        const rawValue = combo.getRawValue();
+                        let rawValue = combo.getRawValue();                        
+                        rawValue = rawValue.trim().replace(/\s/g, '-');
+                        if(rawValue.length <= 0){ 
+                            rawValue = 'Untitled';
+                        }
+
+                        combo.setValue(rawValue);
                         console.log('blur', rawValue);
                         if(rawValue && rawValue.trim().length > 0){
-                            this.groupStore.addNewGroup(rawValue.trim());
+                            const newGroupAdded = this.groupStore.addNewGroup(rawValue.trim());
+                            if(newGroupAdded) {
+                                console.log('blur', eOpts);
+                                setTimeout(() => { GRID.updateSlas(); }, 500);
+                            }
                         }
 
                     },
                     select: (combo, records, eOpts) => {
                         console.log('selected', records[0].data.groupName);
-
-
+                        setTimeout(() => { GRID.updateSlas(); }, 500);
                     }
                 },
                 listClass: 'x-combo-list-small',
@@ -275,6 +390,8 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                 xtype: 'checkcolumn',
                 header: 'Include',
                 dataIndex: 'included',
+                hideable: false,
+                sortable: false,
                 width: 55
             }, {
                 text: 'Azure Resource',
@@ -299,8 +416,8 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                 dataIndex: 'groupName',
                 editor: this.groupCombo
             }, {
-                text: 'SLA (%)',
-                flex: 0.2,
+                text: 'Region',
+                width: 60,
                 hideable: false,
                 sortable: false,
                 groupable: false,
@@ -309,10 +426,39 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                     allowBlank: false
                 },
                 field: {
-                    xtype: 'numberfield'
+                    xtype: 'numberfield',
+                    maxValue: 4,
+                    minValue: 0
+                },
+                summaryType: function(records) {
+                    return records;
+                },
+                summaryRenderer: function (records) {
+                    if(records && records.length > 0) {
+                        const groupName = records[0].get('groupName');
+                        const regionCount = GRID.getGroupRegionCount(groupName);
+                        return `<input class="region-sla-input" type="number" data-group="${groupName}" min="1" max="10" value="${regionCount}" />`;
+                    }
+                    return '';
+                },
+                dataIndex: 'regionCount'
+            }, {
+                text: 'SLA (%)',
+                width: 100,
+                hideable: false,
+                sortable: false,
+                groupable: false,
+                align: 'right',
+                editor: {
+                    allowBlank: false
+                },
+                field: {
+                    xtype: 'numberfield',
+                    maxValue: 100,
+                    minValue: 0
                 },
                 renderer: function (value, metaData, record, rowIdx, colIdx, store, view) {
-                    return value + ' %';
+                    return GRID.getSLAString(value) + ' %';
                 },
                 summaryType: 'count',
                 summaryRenderer: function (value, summaryData, dataIndex) {
