@@ -140,10 +140,7 @@ var data = [
 
 
 
-var cellEditing = Ext.create('Ext.grid.plugin.CellEditing', {
-    clicksToEdit: 1
-});
-var showSummary = true;
+
 
 Ext.define('KitchenSink.view.grid.GroupedGrid', {
     extend: 'Ext.grid.Panel',
@@ -219,7 +216,21 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
         }
         return records;
     },
-    updateSlas: function () {
+    updateSlas: function (force) {
+        if(force === true) {
+            
+            const store = this.getStore();
+            const recordsCount = store.getCount();
+            const dataSet = [];
+            for (let i = 0; i < recordsCount; i++) {
+                const record = store.getAt(i);
+                dataSet.push(record.data);
+            }
+            console.log(dataSet);
+            // store.removeAll();
+            // store.loadData(dataSet);
+        }
+
         const groupNames = this.getDistinctGroupNames();
         let totalSla = 1;
         for (let i = 0; i < groupNames.length; i++) {
@@ -310,7 +321,21 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
     initComponent: function () {
         const GRID = this;
         this.cellEditing = new Ext.grid.plugin.CellEditing({
-            clicksToEdit: 1
+            clicksToEdit: 1,
+            listeners: {
+                beforeedit: function (editor, e) {
+                    const record = e.record;
+                    const fieldName = e.field;
+                    const columnName = e.column.text;
+                    
+                    // if(columnName === 'Resiliency Unit' && fieldName === 'groupName') {
+                        
+                    //     console.log('beforeedit', record.get('groupName'), 'field value', GRID.groupCombo.getValue());
+                    //     // set the records group name to the combo box
+                    //     GRID.groupCombo.setValue(record.get('groupName'));
+                    // }
+                }
+            }
         });
 
         Ext.apply(this, {
@@ -349,15 +374,15 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                         if(rawValue && rawValue.trim().length > 0){
                             const newGroupAdded = this.groupStore.addNewGroup(rawValue.trim());
                             if(newGroupAdded) {
-                                console.log('blur', eOpts);
-                                setTimeout(() => { GRID.updateSlas(); }, 500);
+                                console.log('blur');
+                                setTimeout(() => { GRID.updateSlas(true); }, 500);
                             }
                         }
 
                     },
                     select: (combo, records, eOpts) => {
                         console.log('selected', records[0].data.groupName);
-                        setTimeout(() => { GRID.updateSlas(); }, 500);
+                        setTimeout(() => { GRID.updateSlas(true); }, 500);
                     }
                 },
                 listClass: 'x-combo-list-small',
