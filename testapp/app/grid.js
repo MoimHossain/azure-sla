@@ -164,7 +164,7 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
     getGroupRegionCount: function (groupName) {
         // create a const key for the group name that has not whitespeace in it
         const key = groupName.trim().replace(/\s/g, '-');
-        
+
         // chek if 'this' has a property called 'regionCountMap'
         // if not create an empty object
         // then with in that object if there is map for the given group name
@@ -178,7 +178,7 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
         }
         return this.regionCountMap[key];
     },
-    setGroupRegionCount: function (groupName, value) {        
+    setGroupRegionCount: function (groupName, value) {
         // create a const key for the group name that has not whitespeace in it
         const key = groupName.trim().replace(/\s/g, '-');
         // chek if 'this' has a property called 'regionCountMap'
@@ -217,8 +217,8 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
         return records;
     },
     updateSlas: function (force) {
-        if(force === true) {
-            
+        if (force === true) {
+
             const store = this.getStore();
             const recordsCount = store.getCount();
             const dataSet = [];
@@ -250,7 +250,7 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
             SLACache.push({ groupName: groupName, sla: sla, atleastOneIncluded: atleastOneIncluded });
         }
 
-        
+
         let totalSla = 1;
         let totalIncluded = 0;
         for (let i = 0; i < SLACache.length; i++) {
@@ -319,15 +319,15 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                 return strValue.substring(0, i);
             }
 
-            if(i > decimalPos + 2) {
+            if (i > decimalPos + 2) {
                 const currentDigit = parseInt(strValue[i]);
                 const previousDigit = parseInt(strValue[i - 1]);
-                if(currentDigit === 9 && previousDigit < 9) {
+                if (currentDigit === 9 && previousDigit < 9) {
                     return strValue.substring(0, i);
                 }
             }
 
-            if((i - (decimalPos + 1)) > 8) {
+            if ((i - (decimalPos + 1)) > 8) {
                 // when there are more than 8 digits after the decimal point return the string
                 return strValue.substring(0, i);
             }
@@ -338,7 +338,7 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
         afterrender: function (grid) {
             const gridEl = grid.getEl();
             gridEl.dom.addEventListener('input', function (event) {
-                if (event.target 
+                if (event.target
                     && event.target.nodeName === 'INPUT'
                     && event.target.classList.contains('region-sla-input')) {
 
@@ -351,7 +351,7 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
 
                     grid.getView().refresh();
                 }
-              });
+            });
         }
     },
     initComponent: function () {
@@ -391,25 +391,25 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                 triggerAction: 'all',
                 selectOnTab: true,
                 lazyRender: true,
-                listeners:{
+                listeners: {
                     scope: this,
-                    blur: ( combo, eOpts ) => {
-                        let rawValue = combo.getRawValue();                        
+                    blur: (combo, eOpts) => {
+                        let rawValue = combo.getRawValue();
                         rawValue = rawValue.trim().replace(/\s/g, '-');
-                        if(rawValue.length <= 0){ 
+                        if (rawValue.length <= 0) {
                             rawValue = 'Untitled';
                         }
-                        if(rawValue && rawValue.trim().length > 0){
+                        if (rawValue && rawValue.trim().length > 0) {
                             combo.setValue(rawValue);
                             const newGroupAdded = this.groupStore.addNewGroup(rawValue.trim());
-                            if(combo.activeRecord) {
+                            if (combo.activeRecord) {
                                 combo.activeRecord.set('groupName', rawValue);
                                 GRID.updateSlas(true);
                             }
                         }
                     },
                     select: (combo, records, eOpts) => {
-                        console.log('selected', records[0].data.groupName);                        
+                        console.log('selected', records[0].data.groupName);
                     }
                 },
                 listClass: 'x-combo-list-small',
@@ -419,6 +419,46 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
         });
 
         Ext.apply(this, {
+            tbar: [{
+                xtype: 'button',
+                iconCls: 'fa fa-calculator',
+                text: 'Calculate SLA',
+                scale: 'medium',
+                handler: async () => {
+                    try {
+                        const lcCanvas = window.lc.getImage();
+                        const imageSnapShot = lcCanvas.toDataURL();
+                        console.log('Image Snap Shot:', imageSnapShot);
+                        GRID.loadNewSlaData([]);
+
+                        const response = await fetch('https://azure-sla-calculator.nicewave-e0767b12.westeurope.azurecontainerapps.io/api/SLA', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                image: imageSnapShot
+                            })
+                        });
+                
+                        if (response.ok) {
+                            const services = await response.json();                            
+                            console.log(services);
+                            GRID.loadNewSlaData(services);                            
+                        } else {
+                            alert('Error: ' + response.statusText);
+                        }
+                    } catch (error) {                        
+                        // show the error using extjs error message box
+                        Ext.Msg.show({
+                            title: 'Error',
+                            msg: error.message,
+                            buttons: Ext.Msg.OK,
+                            icon: Ext.Msg.ERROR
+                        });
+                    }
+                }
+            }],
             fbar: Ext.create('Ext.container.Container', {
                 frame: false,
                 height: 60,
@@ -426,17 +466,17 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                 layout: {
                     type: 'hbox',
                     align: 'stretch'
-                },                
+                },
                 items: [{
                     xtype: 'container',
                     padding: '10 0 0 10',
                     html: '<b>Total SLA</b>',
                     flex: 1
-                },{
+                }, {
                     xtype: 'container',
                     padding: '8 6 0 0',
-                    align: 'right',                    
-                    id: 'grandTotalSla',                    
+                    align: 'right',
+                    id: 'grandTotalSla',
                     flex: 0.4
                 }]
             }),
@@ -458,7 +498,7 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                 dataIndex: 'included',
                 hideable: false,
                 sortable: false,
-                width: 55
+                width: 60
             }, {
                 text: 'Azure Resource',
                 flex: 0.7,
@@ -475,7 +515,7 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                 }
             }, {
                 text: 'Resiliency Unit',
-                width: 86,
+                width: 120,
                 hideable: false,
                 sortable: false,
                 dataIndex: 'groupName',
@@ -493,11 +533,11 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                 renderer: function (value, metaData, record, rowIdx, colIdx, store, view) {
                     return '';
                 },
-                summaryType: function(records) {
+                summaryType: function (records) {
                     return records;
                 },
                 summaryRenderer: function (records) {
-                    if(records && records.length > 0) {
+                    if (records && records.length > 0) {
                         const groupName = records[0].get('groupName');
                         const regionCount = GRID.getGroupRegionCount(groupName);
                         return `<input class="region-sla-input" type="number" data-group="${groupName}" min="1" max="10" value="${regionCount}" />`;
@@ -507,7 +547,7 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                 dataIndex: 'regionCount'
             }, {
                 text: 'SLA (%)',
-                width: 120,
+                width: 140,
                 hideable: false,
                 sortable: false,
                 groupable: false,
@@ -523,28 +563,28 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                 renderer: function (value, metaData, record, rowIdx, colIdx, store, view) {
                     return GRID.getSLAString(value) + ' %';
                 },
-                summaryType: function(records) {                    
+                summaryType: function (records) {
                     let groupName = 'Untitled';
                     let calculatedGroupSLA = 0;
                     let atleastOneIncluded = false;
 
-                    if(records.length > 0) {
+                    if (records.length > 0) {
                         groupName = records[0].get('groupName');
-                        let groupCompositeSla = 1;                        
+                        let groupCompositeSla = 1;
                         for (let j = 0; j < records.length; j++) {
                             const record = records[j];
                             const included = record.get('included');
                             const sla = record.get('sla');
-                            if(included === true) {
+                            if (included === true) {
                                 atleastOneIncluded = true;
                                 groupCompositeSla *= ((100 - sla) / 100);
-                            }                            
+                            }
                         }
                         let groupSla = ((1 - groupCompositeSla) * 100);
                         const regionCount = GRID.getGroupRegionCount(groupName);
                         if (regionCount > 1) {
                             const slaWithRegionalRedundancy = (1 - Math.pow((1 - (groupSla / 100)), regionCount)) * 100;
-                            groupSla = slaWithRegionalRedundancy;            
+                            groupSla = slaWithRegionalRedundancy;
                         }
                         calculatedGroupSLA = groupSla;
                     }

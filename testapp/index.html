@@ -1,101 +1,109 @@
 <!doctype html>
 <html>
-  <head>
-    <title>Literally Canvas</title>
-    <link href="./_assets/literallycanvas.css" rel="stylesheet">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no" />
 
-    <link rel="stylesheet" type="text/css" href="./extjs/resources/css/ext-all.css">
-    <script type="text/javascript" src="https://sla.octo-lamp.nl/lib/jquery/dist/jquery.min.js"></script>
-    <script type="text/javascript" src="./extjs/ext-all.js"></script>
-    <script type="text/javascript" src="./app/grid.js"></script>
-    <script type="text/javascript" src="./app/app.js"></script>
+<head>
+  <title>Literally Canvas</title>
+  <link href="./_assets/literallycanvas.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" type="text/css" href="./extjs/resources/css/ext-all.css">
+  <link rel="stylesheet" type="text/css" href="https://cdn.sencha.com/ext/gpl/4.2.1/resources/css/ext-all-neptune.css">
 
-    <style type="text/css">
+  <script type="text/javascript" src="https://sla.octo-lamp.nl/lib/jquery/dist/jquery.min.js"></script>
+  <script type="text/javascript" src="./extjs/ext-all.js"></script>
+  <script type="text/javascript" src="./app/grid.js"></script>
+  <script type="text/javascript" src="./app/app.js"></script>
 
-      .x-app-footer {
-        background-color: #00011b;
-        color: #f1f1f1;
-        padding: 10px;
-        font-size: 12px;
-        font-weight: normal;
-      }
+  <style type="text/css">
+    .x-btn-icon {
+      padding-top: 6px;
+    }
 
-      .sla-footer {
-        background-color: #f2d8a3;
-        color: #000000;
-        padding: 10px;
-        font-size: 16px;
-        font-weight: bold;
-      }
+    .x-app-footer {
+      background-color: #00011b;
+      color: #f1f1f1;
+      padding: 10px;
+      font-size: 12px;
+      font-weight: normal;
+    }
 
-      #grandTotalSla {
-        font-size: 16px;
-        font-weight: bold;
-        text-align: end;        
-      }
-    
-      .region-sla-input {
-        width: 30px;
-        text-align: right;
-        
+    .sla-footer {
+      background-color: #f2d8a3;
+      color: #000000;
+      padding: 10px;
+      font-size: 16px;
+      font-weight: bold;
+    }
 
-      }
-      .x-grid-checkheader {
-        height: 14px;
-        background-image: url('_assets/extux/unchecked.gif');
-        background-position: 50% -2px;
-        background-repeat: no-repeat;
-        background-color: transparent;
+    #grandTotalSla {
+      font-size: 16px;
+      font-weight: bold;
+      text-align: end;
+    }
+
+    .region-sla-input {
+      width: 30px;
+      text-align: right;
+
+
+    }
+
+    .x-grid-checkheader {
+      height: 14px;
+      background-image: url('_assets/extux/unchecked.gif');
+      background-position: 50% -2px;
+      background-repeat: no-repeat;
+      background-color: transparent;
     }
 
     .x-grid-checkheader-checked {
-        background-image: url('_assets/extux/checked.gif');
+      background-image: url('_assets/extux/checked.gif');
     }
 
     .x-grid-checkheader-editor .x-form-cb-wrap {
-        text-align: center;
+      text-align: center;
     }
 
 
-      .x-panel-header {
-        background-color: #00011b;
-        color: #f1f1f1;
-      }
-      
-      .x-panel-header div {
-        background-color: #00011b;
-        color: #f1f1f1;        
-      }
+    .x-panel-header {
+      background-color: #00011b;
+      color: #f1f1f1;
+    }
 
-      .x-panel-header h1 {
-        padding-top: 6px;
-        font-family: Verdana, Geneva, Tahoma, sans-serif;
-        font-size: 22px; 
-      }
+    .x-panel-header div {
+      background-color: #00011b;
+      color: #f1f1f1;
+    }
 
-      .x-panel-header h5 {
-        font-family: Verdana, Geneva, Tahoma, sans-serif;
-         
-      }      
+    .x-panel-header h1 {
+      padding: 6px 0px 4px 6px;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
+      font-size: 22px;
+    }
 
-      .fs-container {
-        width: 320px;
-        margin: auto;
-      }
+    .x-panel-header h5 {
+      padding: 0px 0px 4px 6px;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
+    }
 
-      .literally {
-        width: 100%;
-        height: 100%;
-        position: relative;
-      }
-    </style>
-  </head>
+    .fs-container {
+      width: 320px;
+      margin: auto;
+    }
 
-  <body>
-    <!-- you really ought to include react-dom, but for react 0.14 you don't strictly have to. -->
-    <script src="./_js_libs/react-0.14.3.js"></script>
-    <script src="./_js_libs/literallycanvas.js"></script>
-  </body>
+    .literally {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- you really ought to include react-dom, but for react 0.14 you don't strictly have to. -->
+  <script src="./_js_libs/react-0.14.3.js"></script>
+  <script src="./_js_libs/literallycanvas.js"></script>
+</body>
+
 </html>
