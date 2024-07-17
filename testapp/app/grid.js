@@ -236,6 +236,37 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
             //return;
         }
     },
+    updateGrandTotalSla: function (value) {
+        const SLACache = this.groupSlaCache;
+        const groupName = value.groupName;
+        const sla = value.sla;
+        const atleastOneIncluded = value.atleastOneIncluded;
+
+        const cacheItem = SLACache.find(c => c.groupName === groupName);
+        if (cacheItem) {
+            cacheItem.sla = sla;
+            cacheItem.atleastOneIncluded = atleastOneIncluded;
+        } else {
+            SLACache.push({ groupName: groupName, sla: sla, atleastOneIncluded: atleastOneIncluded });
+        }
+
+        
+        let totalSla = 1;
+        let totalIncluded = 0;
+        for (let i = 0; i < SLACache.length; i++) {
+            const item = SLACache[i];
+            if (item.atleastOneIncluded === true) {
+                ++totalIncluded;
+                totalSla *= item.sla;
+            }
+        }
+        let quantum = totalSla;
+        for (let x = 0; x < totalIncluded - 1; ++x) {
+            quantum = quantum / 100;
+        }
+        const grandTotalSlaString = this.getSLAString(quantum);
+        Ext.getCmp('grandTotalSla').update(`${grandTotalSlaString}%`);
+    },
     loadNewSlaData: function (data) {
         let componentId = 1;
         const refinedComponents = [];
@@ -338,6 +369,7 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
         });
 
         Ext.apply(this, {
+            groupSlaCache: [],
             groupStore: Ext.create('Ext.data.Store', {
                 fields: ['groupName'],
                 data: [],
@@ -390,6 +422,7 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
             fbar: Ext.create('Ext.container.Container', {
                 frame: false,
                 height: 60,
+                cls: 'sla-footer',
                 layout: {
                     type: 'hbox',
                     align: 'stretch'
@@ -401,10 +434,10 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                     flex: 1
                 },{
                     xtype: 'container',
-                    padding: '10 0 0 10',
-                    align: 'right',
-                    html: 'Inner Panel Three',
-                    flex: 0.2
+                    padding: '8 6 0 0',
+                    align: 'right',                    
+                    id: 'grandTotalSla',                    
+                    flex: 0.4
                 }]
             }),
             plugins: [this.cellEditing],
@@ -490,11 +523,14 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                 renderer: function (value, metaData, record, rowIdx, colIdx, store, view) {
                     return GRID.getSLAString(value) + ' %';
                 },
-                summaryType: function(records) {
+                summaryType: function(records) {                    
+                    let groupName = 'Untitled';
+                    let calculatedGroupSLA = 0;
+                    let atleastOneIncluded = false;
+
                     if(records.length > 0) {
-                        const groupName = records[0].get('groupName');
-                        let groupCompositeSla = 1;
-                        let atleastOneIncluded = false;
+                        groupName = records[0].get('groupName');
+                        let groupCompositeSla = 1;                        
                         for (let j = 0; j < records.length; j++) {
                             const record = records[j];
                             const included = record.get('included');
@@ -510,12 +546,13 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                             const slaWithRegionalRedundancy = (1 - Math.pow((1 - (groupSla / 100)), regionCount)) * 100;
                             groupSla = slaWithRegionalRedundancy;            
                         }
-                        return groupSla;
+                        calculatedGroupSLA = groupSla;
                     }
-                    return 0;
+                    return { groupName: groupName, sla: calculatedGroupSLA, atleastOneIncluded: atleastOneIncluded };
                 },
-                summaryRenderer: function (value, summaryData, dataIndex) {                    
-                    return `<b>${GRID.getSLAString(value)}%</b>`;
+                summaryRenderer: function (value, summaryData, dataIndex) {
+                    GRID.updateGrandTotalSla(value);
+                    return `<b>${GRID.getSLAString(value.sla)}%</b>`;
                 },
                 dataIndex: 'sla'
             }]

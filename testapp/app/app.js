@@ -55,10 +55,9 @@ Ext.onReady(function () {
         layout: 'border',
 
         items: [{
-            region: 'east',
+            region: 'center',
             collapsible: false,
-            xtype: 'grouped-grid',
-            width: 600
+            xtype: 'grouped-grid'
 
         }, {
             region: 'north',
@@ -67,6 +66,14 @@ Ext.onReady(function () {
             border: false,
             height: 60,
             margins: '0 0 5 0'
+        }, {
+            region: 'south',
+            cls: 'x-app-footer',
+            html: 'SLAs are calcualted using AI and Machine Learning algorithms. The results are approximate and may vary. Please consult with Azure SLA documentation for accurate SLA values. <br/>Copyright © 2024 Moim Hossain. All rights reserved. ',            
+            border: false,
+            xtype: 'container',
+            height: 60,
+            padding: '10 0 5 10'
         }, {
             region: 'west',
             collapsible: false,
@@ -96,7 +103,9 @@ Ext.onReady(function () {
                     }
                 }
             }
-        }, {
+        }]
+    });
+/*, {
             region: 'center',
             xtype: 'panel',
             collapsible: false,
@@ -114,9 +123,7 @@ Ext.onReady(function () {
             }
             ],
             html: '<div id="sla-calculator"><img id="gagaImg" style="width: 400; height: 400;" /></div>',
-        }]
-    });
-
+        } */
 
 
     window.addEventListener('paste', function (event) {
