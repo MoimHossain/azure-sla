@@ -75,7 +75,7 @@ Ext.define('Component', {
     ]
 });
 
-var data = [
+var dataXXX = [
     {
         "groupName": "Global",
         "components": [
@@ -236,7 +236,7 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
             //return;
         }
     },
-    loadNewSlaData: function () {
+    loadNewSlaData: function (data) {
         let componentId = 1;
         const refinedComponents = [];
         for (let i = 0; i < data.length; i++) {
@@ -294,6 +294,11 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                 if(currentDigit === 9 && previousDigit < 9) {
                     return strValue.substring(0, i);
                 }
+            }
+
+            if((i - (decimalPos + 1)) > 8) {
+                // when there are more than 8 digits after the decimal point return the string
+                return strValue.substring(0, i);
             }
         }
         return strValue;
@@ -367,7 +372,7 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                             const newGroupAdded = this.groupStore.addNewGroup(rawValue.trim());
                             if(combo.activeRecord) {
                                 combo.activeRecord.set('groupName', rawValue);
-                                setTimeout(() => { GRID.updateSlas(true); }, 500);
+                                GRID.updateSlas(true);
                             }
                         }
                     },
@@ -382,13 +387,26 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
         });
 
         Ext.apply(this, {
-            fbar:
-            {
-                xtype: 'panel',
+            fbar: Ext.create('Ext.container.Container', {
                 frame: false,
                 height: 60,
-                html: '<div>THIS IS A GAGA</div>'
-            },
+                layout: {
+                    type: 'hbox',
+                    align: 'stretch'
+                },                
+                items: [{
+                    xtype: 'container',
+                    padding: '10 0 0 10',
+                    html: '<b>Total SLA</b>',
+                    flex: 1
+                },{
+                    xtype: 'container',
+                    padding: '10 0 0 10',
+                    align: 'right',
+                    html: 'Inner Panel Three',
+                    flex: 0.2
+                }]
+            }),
             plugins: [this.cellEditing],
             store: new Ext.data.Store({
                 model: 'Component',
@@ -439,10 +457,8 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                 editor: {
                     allowBlank: false
                 },
-                field: {
-                    xtype: 'numberfield',
-                    maxValue: 4,
-                    minValue: 0
+                renderer: function (value, metaData, record, rowIdx, colIdx, store, view) {
+                    return '';
                 },
                 summaryType: function(records) {
                     return records;
@@ -491,7 +507,6 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                         let groupSla = ((1 - groupCompositeSla) * 100);
                         const regionCount = GRID.getGroupRegionCount(groupName);
                         if (regionCount > 1) {
-                
                             const slaWithRegionalRedundancy = (1 - Math.pow((1 - (groupSla / 100)), regionCount)) * 100;
                             groupSla = slaWithRegionalRedundancy;            
                         }
@@ -507,7 +522,7 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
         });
         this.callParent();
         setTimeout(() => {
-            this.loadNewSlaData();
+            this.loadNewSlaData(dataXXX);
         }, 200);
     }
 });
