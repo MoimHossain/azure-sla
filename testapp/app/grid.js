@@ -227,24 +227,14 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                 dataSet.push(record.data);
             }
             console.log(dataSet);
-            // store.removeAll();
-            // store.loadData(dataSet);
-        }
+            store.removeAll();
 
-        const groupNames = this.getDistinctGroupNames();
-        let totalSla = 1;
-        for (let i = 0; i < groupNames.length; i++) {
-            const groupName = groupNames[i];
-            let groupCompositeSla = 1;
-            const records = this.getRecordsByGroupName(groupName);
-            for (let j = 0; j < records.length; j++) {
-                const record = records[j];
-                groupCompositeSla *= ((100 - record.get('sla')) / 100);
-            }
+            setTimeout(() => {
+                store.loadData(dataSet);
+                //this.updateSlas(false);                
+            }, 100);
+            //return;
         }
-
-        // update grid view
-        this.getView().refresh();
     },
     loadNewSlaData: function () {
         let componentId = 1;
@@ -292,10 +282,18 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
         }
         // Traverse the string starting from the character after the decimal point
         for (let i = decimalPos + 1; i < strValue.length; i++) {
-            // Check if the character is '0'
+            // Check if the character is '0'            
             if (strValue[i] === '0') {
                 // Return the substring up to the position of the first '0'
                 return strValue.substring(0, i);
+            }
+
+            if(i > decimalPos + 2) {
+                const currentDigit = parseInt(strValue[i]);
+                const previousDigit = parseInt(strValue[i - 1]);
+                if(currentDigit === 9 && previousDigit < 9) {
+                    return strValue.substring(0, i);
+                }
             }
         }
         return strValue;
@@ -314,6 +312,8 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                     const groupName = event.target.dataset.group;
                     const value = event.target.value;
                     grid.setGroupRegionCount(groupName, value);
+
+                    grid.getView().refresh();
                 }
               });
         }
@@ -325,15 +325,9 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
             listeners: {
                 beforeedit: function (editor, e) {
                     const record = e.record;
-                    const fieldName = e.field;
-                    const columnName = e.column.text;
-                    
-                    // if(columnName === 'Resiliency Unit' && fieldName === 'groupName') {
-                        
-                    //     console.log('beforeedit', record.get('groupName'), 'field value', GRID.groupCombo.getValue());
-                    //     // set the records group name to the combo box
-                    //     GRID.groupCombo.setValue(record.get('groupName'));
-                    // }
+                    Ext.apply(GRID.groupCombo, {
+                        activeRecord: record
+                    });
                 }
             }
         });
@@ -368,21 +362,17 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                         if(rawValue.length <= 0){ 
                             rawValue = 'Untitled';
                         }
-
-                        combo.setValue(rawValue);
-                        console.log('blur', rawValue);
                         if(rawValue && rawValue.trim().length > 0){
+                            combo.setValue(rawValue);
                             const newGroupAdded = this.groupStore.addNewGroup(rawValue.trim());
-                            if(newGroupAdded) {
-                                console.log('blur');
+                            if(combo.activeRecord) {
+                                combo.activeRecord.set('groupName', rawValue);
                                 setTimeout(() => { GRID.updateSlas(true); }, 500);
                             }
                         }
-
                     },
                     select: (combo, records, eOpts) => {
-                        console.log('selected', records[0].data.groupName);
-                        setTimeout(() => { GRID.updateSlas(true); }, 500);
+                        console.log('selected', records[0].data.groupName);                        
                     }
                 },
                 listClass: 'x-combo-list-small',
@@ -424,7 +414,6 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                 hideable: false,
                 sortable: false,
                 groupable: false,
-
                 renderer: function (value, metaData, record, rowIdx, colIdx, store, view) {
                     return `${value} (${record.data.tier})`;
                 },
@@ -435,7 +424,7 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                 }
             }, {
                 text: 'Resiliency Unit',
-                flex: 0.4,
+                width: 86,
                 hideable: false,
                 sortable: false,
                 dataIndex: 'groupName',
@@ -469,7 +458,7 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                 dataIndex: 'regionCount'
             }, {
                 text: 'SLA (%)',
-                width: 100,
+                width: 120,
                 hideable: false,
                 sortable: false,
                 groupable: false,
@@ -485,9 +474,33 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                 renderer: function (value, metaData, record, rowIdx, colIdx, store, view) {
                     return GRID.getSLAString(value) + ' %';
                 },
-                summaryType: 'count',
-                summaryRenderer: function (value, summaryData, dataIndex) {
-                    return '<b>99.9%</b>';
+                summaryType: function(records) {
+                    if(records.length > 0) {
+                        const groupName = records[0].get('groupName');
+                        let groupCompositeSla = 1;
+                        let atleastOneIncluded = false;
+                        for (let j = 0; j < records.length; j++) {
+                            const record = records[j];
+                            const included = record.get('included');
+                            const sla = record.get('sla');
+                            if(included === true) {
+                                atleastOneIncluded = true;
+                                groupCompositeSla *= ((100 - sla) / 100);
+                            }                            
+                        }
+                        let groupSla = ((1 - groupCompositeSla) * 100);
+                        const regionCount = GRID.getGroupRegionCount(groupName);
+                        if (regionCount > 1) {
+                
+                            const slaWithRegionalRedundancy = (1 - Math.pow((1 - (groupSla / 100)), regionCount)) * 100;
+                            groupSla = slaWithRegionalRedundancy;            
+                        }
+                        return groupSla;
+                    }
+                    return 0;
+                },
+                summaryRenderer: function (value, summaryData, dataIndex) {                    
+                    return `<b>${GRID.getSLAString(value)}%</b>`;
                 },
                 dataIndex: 'sla'
             }]
