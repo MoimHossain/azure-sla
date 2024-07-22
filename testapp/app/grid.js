@@ -249,8 +249,6 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
         } else {
             SLACache.push({ groupName: groupName, sla: sla, atleastOneIncluded: atleastOneIncluded });
         }
-
-
         let totalSla = 1;
         let totalIncluded = 0;
         for (let i = 0; i < SLACache.length; i++) {
@@ -259,11 +257,11 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                 ++totalIncluded;
                 totalSla *= item.sla;
             }
-        }
+        }        
         let quantum = totalSla;
         for (let x = 0; x < totalIncluded - 1; ++x) {
             quantum = quantum / 100;
-        }
+        }        
         const grandTotalSlaString = this.getSLAString(quantum);
         Ext.getCmp('grandTotalSla').update(`${grandTotalSlaString}%`);
     },
