@@ -1,10 +1,15 @@
 using System.Text.Json.Serialization;
 using System.Text.Json;
 using AzureSLA.Shared;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using Microsoft.Extensions.Options;
+using SLAFrontend;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddRazorPages();
+builder.Services.AddRazorPages(razorPageOptions => 
+{
+    razorPageOptions.Conventions.Add(new HomePageRouteModelConvention());
+});
 builder.Services.AddControllers();
 builder.Services.AddLogging(logging =>
 {
@@ -45,6 +50,7 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapRazorPages();
+//app.MapFallbackToPage("/Home");
 app.MapControllers(); // Add this line to map controllers
 
 app.Run();

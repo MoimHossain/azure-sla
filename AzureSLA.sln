@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AzureSLA.Console", "AzureSL
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AzureSLA.Shared", "AzureSLA.Shared\AzureSLA.Shared.csproj", "{12C3755A-D526-4EE4-B852-8AB24FF96BA4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SLAFrontend", "SLAFrontend\SLAFrontend.csproj", "{51CF723B-13B1-4975-8A28-F7C327BB50A6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SLAFrontend", "SLAFrontend\SLAFrontend.csproj", "{51CF723B-13B1-4975-8A28-F7C327BB50A6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

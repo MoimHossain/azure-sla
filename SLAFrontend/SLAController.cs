@@ -1,7 +1,7 @@
-﻿using AzureSLA.Shared;
-using AzureSLA.Shared.CognitiveServices;
+﻿using AzureSLA.Shared.CognitiveServices;
 using AzureSLA.Shared.CognitiveServices.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
 
 
 
@@ -50,4 +50,32 @@ namespace SLAFrontend
     }
 
     public record DiagramPayload(string? Image);
+
+
+
+    public class HomePageRouteModelConvention : IPageRouteModelConvention
+    {
+        public void Apply(PageRouteModel model)
+        {
+            if (model.RelativePath == "/Pages/Index.cshtml")
+            {
+                var currentHomePage = model.Selectors
+                    .Single(s => s != null && 
+                    s.AttributeRouteModel != null && 
+                    s.AttributeRouteModel.Template == string.Empty);
+                model.Selectors.Remove(currentHomePage);
+            }
+
+            if (model.RelativePath == $"/Pages/Home.cshtml")
+            {
+                model.Selectors.Add(new SelectorModel()
+                {
+                    AttributeRouteModel = new AttributeRouteModel
+                    {
+                        Template = string.Empty
+                    }
+                });
+            }
+        }
+    }
 }
