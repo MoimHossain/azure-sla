@@ -47,62 +47,40 @@ const resizeImage = (image, maxWidth, maxHeight) => {
 }
 
 
-Ext.onReady(function () {
+Ext.onReady(async function () {
     Ext.tip.QuickTipManager.init();
 
-
-
-    auth0.createAuth0Client({
+    const auth0Client = await auth0.createAuth0Client({
         domain: "cloudoven.eu.auth0.com",
         clientId: "6go82kJxDqiMS1kWDAFL1HWmPVqVn7dI",
+        useRefreshTokens: false,
         authorizationParams: {
-            redirect_uri: window.location.origin
+            redirect_uri: window.location.origin,
+            audience: "https://sla.octo-lamp.nl/"
         }
-    }).then(async (auth0Client) => {
-        /*
-        const loginButton = document.getElementById("login");
-
-        loginButton.addEventListener("click", (e) => {
-            e.preventDefault();
-            auth0Client.loginWithRedirect();
-        });*/
-
-        if (location.search.includes("state=") &&
-            (location.search.includes("code=") ||
-                location.search.includes("error="))) {
-            await auth0Client.handleRedirectCallback();
-            window.history.replaceState({}, document.title, "/");
-        }
-
-        /*
-        const logoutButton = document.getElementById("logout");
-
-        logoutButton.addEventListener("click", (e) => {
-            e.preventDefault();
-            auth0Client.logout();
-        });*/
-
-        const isAuthenticated = await auth0Client.isAuthenticated();
-        const userProfile = await auth0Client.getUser();
-
-        console.log(userProfile);
-        console.log(isAuthenticated);
-        
-        /*const profileElement = document.getElementById("profile");
-
-        if (isAuthenticated) {
-            profileElement.style.display = "block";
-            profileElement.innerHTML = `
-            <p>${userProfile.name}</p>
-            <img src="${userProfile.picture}" />
-          `;
-        } else {
-            profileElement.style.display = "none";
-        }*/
     });
 
-    //return;
+    if (location.search.includes("state=") &&
+        (location.search.includes("code=") ||
+            location.search.includes("error="))) {
+        await auth0Client.handleRedirectCallback();
+        window.history.replaceState({}, document.title, "/");
+    }
 
+    const isAuthenticated = await auth0Client.isAuthenticated();
+    if (isAuthenticated !== true) {
+        auth0Client.loginWithRedirect();
+        return;
+    }
+    /*
+    const userProfile = await auth0Client.getUser();
+    const accessToken = await auth0Client.getTokenSilently();
+    console.log(accessToken)
+    console.log(userProfile)
+
+    const idTokenClaims = await auth0.getIdTokenClaims();
+  idToken = idTokenClaims.__raw;
+  console.log('ID Token:', idToken); */
 
     Ext.create('Ext.container.Viewport', {
         layout: 'border',
@@ -114,11 +92,32 @@ Ext.onReady(function () {
 
         }, {
             region: 'north',
-            cls: 'x-panel-header',
-            html: '<h1>Azure SLA calculator</h1><h5>Calculate SLA for Azure resources directly from Architecture diagram</h5>',
+            cls: 'x-panel-header',            
             border: false,
             height: 60,
-            margins: '0 0 5 0'
+            margins: '0 0 5 0',
+            items: [{
+                xtype: 'container',
+                region: 'center',
+                html: '<h1>Azure SLA calculator</h1><h5>Calculate SLA for Azure resources directly from Architecture diagram</h5>'
+            }, {
+                region: 'east',
+                width: 160,
+                listeners: {
+                    afterrender: {
+                        delay: 100,
+                        fn: async (containerComponent) => {
+                            const userProfile = await auth0Client.getUser();
+                            console.log(userProfile)
+                            containerComponent.update(`<div class="user-container"><img src="${userProfile.picture}" alt="${userProfile.name}" /><div class="name-content">${userProfile.name}</div></div>`);
+                        }
+                    }
+                },
+                frame: false,
+                border: false,
+                xtype: 'container'
+            }],
+            layout: 'border'
         }, {
             region: 'south',
             cls: 'x-app-footer',

@@ -1,4 +1,6 @@
 
+
+
 .x-btn-icon {
     padding-top: 6px;
 }
@@ -52,21 +54,21 @@
     color: #f1f1f1;
 }
 
-    .x-panel-header div {
-        background-color: #00011b;
-        color: #f1f1f1;
-    }
+.x-panel-header div {
+    background-color: #00011b;
+    color: #f1f1f1;
+}
 
-    .x-panel-header h1 {
-        padding: 6px 0px 4px 6px;
-        font-family: Verdana, Geneva, Tahoma, sans-serif;
-        font-size: 22px;
-    }
+.x-panel-header h1 {
+    padding: 6px 0px 4px 6px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-size: 22px;
+}
 
-    .x-panel-header h5 {
-        padding: 0px 0px 4px 6px;
-        font-family: Verdana, Geneva, Tahoma, sans-serif;
-    }
+.x-panel-header h5 {
+    padding: 0px 0px 4px 6px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
 
 .fs-container {
     width: 320px;
@@ -77,4 +79,24 @@
     width: 100%;
     height: 100%;
     position: relative;
+}
+
+
+
+.user-container {
+    display: grid;
+    grid-template-columns: auto 1fr; /* Auto size for image, flexible for content */
+    align-items: center; /* Center vertically */    
+    border: 0px solid #ccc; /* Optional, for visualization */
+}
+
+.user-container img {
+    width: 30px;
+    height: auto;
+    margin: 10px 0px 0px 0px;
+}
+
+.user-container .name-content {
+    font-weight: bold;
+    margin: 0px 0px 0px 10px;
 }
