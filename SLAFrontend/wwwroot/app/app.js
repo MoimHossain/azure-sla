@@ -72,15 +72,7 @@ Ext.onReady(async function () {
         auth0Client.loginWithRedirect();
         return;
     }
-    /*
-    const userProfile = await auth0Client.getUser();
-    const accessToken = await auth0Client.getTokenSilently();
-    console.log(accessToken)
-    console.log(userProfile)
 
-    const idTokenClaims = await auth0.getIdTokenClaims();
-  idToken = idTokenClaims.__raw;
-  console.log('ID Token:', idToken); */
 
     Ext.create('Ext.container.Viewport', {
         layout: 'border',
@@ -88,8 +80,8 @@ Ext.onReady(async function () {
         items: [{
             region: 'center',
             collapsible: false,
-            xtype: 'grouped-grid'
-
+            xtype: 'grouped-grid',
+            auth0Client: auth0Client
         }, {
             region: 'north',
             cls: 'x-panel-header',            
@@ -107,9 +99,15 @@ Ext.onReady(async function () {
                     afterrender: {
                         delay: 100,
                         fn: async (containerComponent) => {
-                            const userProfile = await auth0Client.getUser();
-                            console.log(userProfile)
-                            containerComponent.update(`<div class="user-container"><img src="${userProfile.picture}" alt="${userProfile.name}" /><div class="name-content">${userProfile.name}</div></div>`);
+                            const userProfile = await auth0Client.getUser();                            
+                            containerComponent.update(`<div class="user-container"><img src="${userProfile.picture}" alt="${userProfile.name}" /><div class="name-content">${userProfile.name}</div><br/><div class="logout-content">Logout</div></div>`);
+                            const containerEl = containerComponent.getEl();                            
+                            containerEl.on('click', function (event, target) {
+                                if (Ext.fly(target).is('div') && event.target.className === 'logout-content') {
+                                    auth0Client.logout();
+                                    document.location.reload();
+                                }
+                            }, containerEl);
                         }
                     }
                 },

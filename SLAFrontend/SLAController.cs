@@ -1,7 +1,12 @@
 ﻿using AzureSLA.Shared.CognitiveServices;
 using AzureSLA.Shared.CognitiveServices.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 
 
 
@@ -9,12 +14,31 @@ namespace SLAFrontend
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class SLAController(DiagramAnalyzeService diagramAnalyzeService) : ControllerBase
-    {
+    public class SLAController(
+        DiagramAnalyzeService diagramAnalyzeService,
+        TokenValidator tokenValidator,
+        ILogger<SLAController> logger) : ControllerBase
+    {   
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] DiagramPayload payload)
-        {
-            if(payload != null && !string.IsNullOrWhiteSpace(payload.Image))
+        {   
+            var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+
+            if(!string.IsNullOrWhiteSpace(token))
+            {
+                var authority = "https://cloudoven.eu.auth0.com/";
+                var audience = "https://sla.octo-lamp.nl/";
+
+                var cp = await tokenValidator.ValidateTokenAsync(token, authority, audience);
+
+                if(cp == null)
+                {
+                    return Unauthorized();
+                }
+            }
+
+
+            if (payload != null && !string.IsNullOrWhiteSpace(payload.Image))
             {
                 var parts = payload.Image.Split(',');
 

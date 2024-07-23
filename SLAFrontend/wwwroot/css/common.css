@@ -96,7 +96,19 @@
     margin: 10px 0px 0px 0px;
 }
 
+.user-container .logout-content {
+    font-weight: normal;
+    margin: -20px 0px 0px 10px;
+    cursor: pointer;
+}
+
+.user-container .logout-content:hover {
+    font-weight: bold;
+    cursor: pointer;
+}
+
 .user-container .name-content {
     font-weight: bold;
     margin: 0px 0px 0px 10px;
 }
+

@@ -413,19 +413,37 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
             tbar: [{
                 xtype: 'button',
                 iconCls: 'fa fa-calculator',
-                text: 'Calculate SLA',
+                text: 'Calculate SLA',                
                 scale: 'medium',
                 handler: async () => {
+                    let imageSnapShot = null;
                     try {
                         const lcCanvas = window.lc.getImage();
-                        const imageSnapShot = lcCanvas.toDataURL();
+                        imageSnapShot = lcCanvas.toDataURL();
                         console.log('Image Snap Shot:', imageSnapShot);
+                    } catch (error) {                        
+                        Ext.Msg.show({
+                            title: 'Error',
+                            msg: `Please draw solution diagram, or paste (Ctrl+v) an image of diagram on canvas.<br/>${error.message}`,
+                            buttons: Ext.Msg.OK,
+                            icon: Ext.Msg.ERROR
+                        });
+                        return;
+                    }
+
+
+                    try {
+                        const auth0Client = GRID.auth0Client;
+                        const userProfile = await auth0Client.getUser();
+                        const accessToken = await auth0Client.getTokenSilently();
+
                         GRID.loadNewSlaData([]);
 
-                        const response = await fetch('https://azure-sla-calculator.nicewave-e0767b12.westeurope.azurecontainerapps.io/api/SLA', {
+                        const response = await fetch('/api/SLA', {
                             method: 'POST',
                             headers: {
-                                'Content-Type': 'application/json'
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${accessToken}`
                             },
                             body: JSON.stringify({
                                 image: imageSnapShot
@@ -589,9 +607,9 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
             }]
         });
         this.callParent();
-        setTimeout(() => {
-            this.loadNewSlaData(dataXXX);
-        }, 200);
+        //setTimeout(() => {
+        //    this.loadNewSlaData(dataXXX);
+        //}, 200);
     }
 });
 

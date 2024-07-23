@@ -29,7 +29,8 @@ builder.Services.AddSingleton(services =>
     jsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     return jsonSerializerOptions;
 });
-
+builder.Services.AddTransient<TokenValidator>();
+builder.Services.AddHttpClient();
 builder.Services.AddRequiredServices();
 
 var app = builder.Build();
