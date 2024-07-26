@@ -431,6 +431,15 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                         return;
                     }
 
+                    Ext.Msg.show({
+                        msg: 'Analyzing diagram, please wait...',
+                        progressText: 'Analyzing...',
+                        width: 300,
+                        wait: true,
+                        waitConfig: { interval: 200 },
+                        icon: 'ext-mb-download', 
+                        iconHeight: 50
+                    });
 
                     try {
                         const auth0Client = GRID.auth0Client;
@@ -449,15 +458,21 @@ Ext.define('KitchenSink.view.grid.GroupedGrid', {
                                 image: imageSnapShot
                             })
                         });
-                
+                        Ext.MessageBox.hide();
                         if (response.ok) {
                             const services = await response.json();                            
                             console.log(services);
                             GRID.loadNewSlaData(services);                            
                         } else {
-                            alert('Error: ' + response.statusText);
+                            Ext.Msg.show({
+                                title: 'Error',
+                                msg: response.statusText,
+                                buttons: Ext.Msg.OK,
+                                icon: Ext.Msg.ERROR
+                            });
                         }
-                    } catch (error) {                        
+                    } catch (error) {
+                        Ext.MessageBox.hide();
                         // show the error using extjs error message box
                         Ext.Msg.show({
                             title: 'Error',
